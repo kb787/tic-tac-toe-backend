@@ -1,14 +1,17 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
 
-const db = new sqlite3.Database(path.resolve(__dirname, '../tic-tac-toe.db'), (err) => {
-  if (err) {
-    console.error('Error connecting to database:', err.message);
-  } else {
-    console.log('Connected to the SQLite database.');
-    initializeDatabase();
+const db = new sqlite3.Database(
+  path.resolve(__dirname, "../tic-tac-toe.db"),
+  (err) => {
+    if (err) {
+      console.error("Error connecting to database:", err.message);
+    } else {
+      console.log("Connected to the SQLite database.");
+      initializeDatabase();
+    }
   }
-});
+);
 
 function initializeDatabase() {
   db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -16,6 +19,19 @@ function initializeDatabase() {
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS user_profiles (
+    id INTEGER PRIMARY KEY,
+    first_name TEXT,
+    last_name TEXT,
+    email TEXT UNIQUE,
+    bio TEXT,
+    avatar_url TEXT,
+    total_games INTEGER DEFAULT 0,
+    wins INTEGER DEFAULT 0,
+    losses INTEGER DEFAULT 0,
+    FOREIGN KEY(id) REFERENCES users(id)
   )`);
 
   db.run(`CREATE TABLE IF NOT EXISTS games (
