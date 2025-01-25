@@ -35,6 +35,7 @@ const startGame = (req, res) => {
   );
 };
 
+
 const makeMove = (req, res) => {
     const { gameId, position } = req.body;
     const playerId = req.user.id;
@@ -48,19 +49,21 @@ const makeMove = (req, res) => {
     try {
       const moveResult = gameInstance.makeMove(position);
   
-      const updateQuery = `UPDATE games SET board = ?, status = ?, winner = ? WHERE id = ?`;
+      const updateQuery = `UPDATE games SET board = ?, status = ?, winner_id = ? WHERE id = ?`;
       const status = moveResult.winner
         ? moveResult.winner === "Draw"
           ? "DRAW"
           : "COMPLETED"
         : "IN_PROGRESS";
   
-      const winner = moveResult.winner && moveResult.winner !== "Draw" ? moveResult.winner : null;
-    db.run(updateQuery, [moveResult.board.join(""), status, winner, gameId], (err) => {
+      const winnerId = moveResult.winner && moveResult.winner !== "Draw" ? playerId : null;
+  
+      db.run(updateQuery, [moveResult.board.join(""), status, winnerId, gameId], (err) => {
         if (err) {
           console.error("Database Update Error:", err.message);
           return res.status(500).json({ error: `Move update failed: ${err.message}` });
         }
+  
         const moveRecordQuery = `INSERT INTO moves (game_id, player_id, position) VALUES (?, ?, ?)`;
         db.run(moveRecordQuery, [gameId, playerId, position]);
   
@@ -75,6 +78,7 @@ const makeMove = (req, res) => {
       res.status(400).json({ error: error.message });
     }
   };
+  
 
 const getUserGames = (req, res) => {
     const userId = req.user.id;
